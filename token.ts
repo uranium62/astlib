@@ -17,7 +17,7 @@ export class Token {
     constructor(type: TokenType, value: string, pos: number) {
         this.type = type;
         this.value = value;
-        this.position = 0;
+        this.position = pos;
     }
 }
 

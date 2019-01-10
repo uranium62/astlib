@@ -4,13 +4,13 @@ import { Variables } from "./variables";
 
 export class SyntaxParser {
 
-    private possition: number;
+    private position: number;
     private size: number;
     private tokens: Token[];
     private variables: Variables;
 
     constructor(tokens: Token[], variables: Variables) {
-        this.possition = 0;
+        this.position = 0;
         this.size = tokens.length;
         this.tokens = tokens;
         this.variables = variables
@@ -19,7 +19,7 @@ export class SyntaxParser {
     private static EOF: Token = new Token(TokenType.EOF, '', -1);
       
     private get(relativePosition: number): Token {
-        var pos = this.possition + relativePosition;
+        var pos = this.position + relativePosition;
 
         if (pos >= this.size){
             return SyntaxParser.EOF;
@@ -31,11 +31,11 @@ export class SyntaxParser {
     private match(tokenType: TokenType): boolean {
         var current = this.get(0);
 
-        if (current.type === tokenType) {
-            return true;
-        } else {
-            this.possition++;
+        if (current.type !== tokenType) {
             return false;
+        } else {
+            this.position++;
+            return true;
         }
     }
 
