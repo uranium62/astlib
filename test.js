@@ -10,6 +10,8 @@ var BinaryExpression = require('./dist/expression.js').BinaryExpression;
 var UnaryExpression = require('./dist/expression.js').UnaryExpression;
 var BinaryOperation = require('./dist/expression.js').BinaryOperation;
 
+var Variables = require('./dist/variables').Variables;
+
 
 describe('Tokenizer', () => {
     var tokenizer = new Tokenizer();
@@ -133,6 +135,34 @@ describe('Parser', () => {
         } catch (err) {
             expect(err.message).to.be.equal("Invalid query (pos:9)")
         }
+    });
+
+    it("should support replaceable variables", () => {
+        let variables = new Variables();
+        let tokenizer = new Tokenizer();
+
+        var src1 = "Lorem ipsum dolor sit amet, lacus diam vehicula";
+        var src2 = "Sed ut perspiciatis unde omnis iste natus error";
+        var src3 = "But I must explain to you how all this mistaken";
+
+        var query  = "Lorem AND diam";
+        var tokens = tokenizer.split(query);
+        let parser = new SyntaxParser(tokens, variables);
+
+        var expression = parser.parse();
+
+        variables.add("source", src1);
+        var isMatch1 = expression.eval().Boolean();
+
+        variables.add("source", src2);
+        var isMatch2 = expression.eval().Boolean();
+
+        variables.add("source", src3);
+        var isMatch3 = expression.eval().Boolean();
+
+        expect(isMatch1).to.be.true;
+        expect(isMatch2).to.be.false;
+        expect(isMatch3).to.be.false;
     });
     
 });
