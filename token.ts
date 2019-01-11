@@ -1,4 +1,3 @@
-
 export enum TokenType {
     Word,
     AND,
@@ -22,41 +21,69 @@ export class Token {
 }
 
 export class Tokenizer {
-    
+
+    private static SystemWords: { [name: string]: boolean; } = {
+        "AND": true,
+        "OR" : true,
+        "NOT": true
+    };
+
     public split(str: string): Token[] {
         var tokens: Token[] = [];
-        var buffer: string  = ""; 
+        var buffer: string = ""; 
         var cursor: number = 0;
+        var word:   string = "";
         
+        str = str + " ";
         for(var i = 0; i < str.length; i++){            
             switch (str[i]){
                 case " ": {
-                    this.flush(tokens, buffer, cursor);
-                    buffer = "";
-                    cursor = i + 1;
+                    if (Tokenizer.SystemWords[word]){
+                        this.flush(tokens, buffer, cursor);
+                        this.flush(tokens, word, i - word.length);
+                        buffer = word = "";
+                        cursor = i + 1;
+                    } else {
+                        let space = buffer ? " " : "";
+                        buffer += space + word;
+                        word = "";
+                    }
                     break;
                 }
+
                 case "(": {
-                    this.flush(tokens, buffer, cursor);
-                    tokens.push(new Token(TokenType.BeginBracket, '', i));
-                    buffer = ""
+                    if (Tokenizer.SystemWords[word]){
+                        this.flush(tokens, buffer, cursor);
+                        this.flush(tokens, word, i - word.length);
+                    } else {
+                        this.flush(tokens, buffer + word, cursor);
+                    }
+                    this.flush(tokens, "(", i);
+                    buffer = word = "";
                     cursor = i + 1;
                     break;
                 }
+
                 case ")": {
-                    this.flush(tokens, buffer, cursor);
-                    tokens.push(new Token(TokenType.EndBracket, '', i));
-                    buffer = "";
+                    if (Tokenizer.SystemWords[word]){
+                        this.flush(tokens, buffer, cursor);
+                        this.flush(tokens, word, i - word.length);
+                    } else {
+                        this.flush(tokens, buffer + word, cursor);
+                    }
+                    this.flush(tokens, ")", i);
+                    buffer = word = "";
                     cursor = i + 1;
                     break;
                 }
+
                 default: {
-                    buffer += str[i];
+                    word += str[i];
                 }
             }
         }
 
-        this.flush(tokens, buffer, cursor);
+        this.flush(tokens, buffer + word, cursor);
 
         return tokens;
     }
@@ -68,20 +95,29 @@ export class Tokenizer {
         }
 
         switch(buffer) {
+            case "(": {
+                tokens.push(new Token(TokenType.BeginBracket, '(', cursor));
+                break;
+            }
+            case ")": {
+                tokens.push(new Token(TokenType.EndBracket, ')', cursor));
+                break;
+            }
             case "AND": {
-                tokens.push(new Token(TokenType.AND, '', cursor));
+                tokens.push(new Token(TokenType.AND, 'AND', cursor));
                 break;
             }    
             case "OR": {
-                tokens.push(new Token(TokenType.OR, '', cursor));
+                tokens.push(new Token(TokenType.OR, 'OR', cursor));
                 break;
             }
             case "NOT": {
-                tokens.push(new Token(TokenType.NOT, '', cursor));
+                tokens.push(new Token(TokenType.NOT, 'NOT', cursor));
                 break;
             }
             default:
                 tokens.push(new Token(TokenType.Word, buffer, cursor));
+                break;
         }
     }
 }

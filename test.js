@@ -54,6 +54,32 @@ describe('Tokenizer', () => {
         expect(tokens[3].type).to.equal(TokenType.EndBracket);
         expect(tokens[3].type).to.equal(TokenType.EndBracket);
     });
+
+    it('should split query with two or more words', () => {
+        var query = "Hello world AND I am crazy AND Life is sucks";
+
+        var tokens = tokenizer.split(query);
+
+        expect(tokens.length).to.equal(5);
+
+        expect(tokens[0].type).to.equal(TokenType.Word);
+        expect(tokens[1].type).to.equal(TokenType.AND);
+        expect(tokens[2].type).to.equal(TokenType.Word);
+        expect(tokens[3].type).to.equal(TokenType.AND);
+        expect(tokens[4].type).to.equal(TokenType.Word);
+
+        expect(tokens[0].value).to.equal("Hello world");
+        expect(tokens[1].value).to.equal("AND");
+        expect(tokens[2].value).to.equal("I am crazy");
+        expect(tokens[3].value).to.equal("AND");
+        expect(tokens[4].value).to.equal("Life is sucks");
+
+        expect(tokens[0].position).to.equal(0);
+        expect(tokens[1].position).to.equal(12);
+        expect(tokens[2].position).to.equal(16);
+        expect(tokens[3].position).to.equal(27);
+        expect(tokens[4].position).to.equal(31);
+    });
 });
 
 describe('Parser', () => {
